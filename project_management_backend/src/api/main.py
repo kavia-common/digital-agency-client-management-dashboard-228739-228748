@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -46,13 +48,34 @@ app = FastAPI(
     openapi_tags=openapi_tags,
 )
 
-# Keep CORS permissive for local dev; frontend will use Authorization: Bearer tokens.
+
+def _split_env_csv(value: str) -> list[str]:
+    """Split a comma-separated env var into a list of stripped, non-empty strings."""
+    return [v.strip() for v in (value or "").split(",") if v.strip()]
+
+
+# CORS configuration
+#
+# Default is dev-friendly and allows typical local frontend + this backend port.
+# In hosted environments the orchestrator can set ALLOWED_ORIGINS accordingly.
+_allowed_origins = _split_env_csv(
+    os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001",
+    )
+)
+_allowed_methods = _split_env_csv(os.getenv("ALLOWED_METHODS", "GET,POST,PUT,DELETE,PATCH,OPTIONS")) or ["*"]
+_allowed_headers = _split_env_csv(os.getenv("ALLOWED_HEADERS", "Content-Type,Authorization,X-Requested-With")) or ["*"]
+_max_age = int(os.getenv("CORS_MAX_AGE", "3600"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # If explicitly set to "*" (or empty), allow all; otherwise use list.
+    allow_origins=["*"] if (not _allowed_origins or _allowed_origins == ["*"]) else _allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=_allowed_methods,
+    allow_headers=_allowed_headers,
+    max_age=_max_age,
 )
 
 
