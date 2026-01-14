@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes.auth import router as auth_router
+from src.api.routes.clients import router as clients_router
+from src.api.routes.projects import router as projects_router
 from src.db.init_db import init_db
 
 openapi_tags = [
@@ -12,6 +14,14 @@ openapi_tags = [
     {
         "name": "auth",
         "description": "Authentication endpoints (register/login) and current user lookup using JWT Bearer tokens.",
+    },
+    {
+        "name": "clients",
+        "description": "CRUD endpoints for managing clients (owned per authenticated user).",
+    },
+    {
+        "name": "projects",
+        "description": "CRUD endpoints for managing projects (owned per authenticated user), optionally linked to clients.",
     },
 ]
 
@@ -49,3 +59,5 @@ def health_check():
 
 
 app.include_router(auth_router)
+app.include_router(clients_router)
+app.include_router(projects_router)
