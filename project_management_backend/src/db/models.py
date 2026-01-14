@@ -37,6 +37,13 @@ class User(Base):
         passive_deletes=True,
     )
 
+    settings: Mapped[Optional["UserSettings"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        uselist=False,
+    )
+
 
 class Client(Base):
     """A client belonging to a specific user (owner)."""
@@ -121,3 +128,34 @@ class Project(Base):
     # Relationships
     client: Mapped[Optional["Client"]] = relationship(back_populates="projects")
     owner: Mapped["User"] = relationship()
+
+
+class UserSettings(Base):
+    """Per-user preferences/settings.
+
+    Currently supports a theme preference (light/dark).
+    """
+
+    __tablename__ = "user_settings"
+
+    # One-to-one with users.
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+    theme: Mapped[str] = mapped_column(
+        String(10),
+        nullable=False,
+        default="light",
+        index=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    user: Mapped["User"] = relationship(back_populates="settings")

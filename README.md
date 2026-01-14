@@ -99,3 +99,40 @@ curl -sS -X POST http://localhost:<backend-port>/projects \
 curl -sS "http://localhost:<backend-port>/projects?status=in_progress&sort_by=due_date&sort_dir=asc" \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+## Dashboard analytics - example curl
+
+Get counts + recent items for the authenticated user:
+```bash
+curl -sS "http://localhost:<backend-port>/dashboard/analytics?recent_limit=5" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Example response:
+```json
+{
+  "counts": {
+    "total_clients": 3,
+    "total_projects": 7,
+    "projects_by_status": { "planned": 2, "in_progress": 3, "completed": 2 }
+  },
+  "recent_clients": [{ "id": 12, "name": "Acme Corp", "created_at": "2026-01-14T06:10:00Z" }],
+  "recent_projects": [{ "id": 55, "name": "Website Redesign", "status": "in_progress", "created_at": "2026-01-14T06:12:00Z" }]
+}
+```
+
+## User settings (theme) - example curl
+
+1) Get current settings:
+```bash
+curl -sS "http://localhost:<backend-port>/settings" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+2) Update theme (light/dark):
+```bash
+curl -sS -X PUT "http://localhost:<backend-port>/settings" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"theme":"dark"}'
+```

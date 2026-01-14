@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes.auth import router as auth_router
 from src.api.routes.clients import router as clients_router
+from src.api.routes.dashboard import router as dashboard_router
 from src.api.routes.projects import router as projects_router
+from src.api.routes.settings import router as settings_router
 from src.db.init_db import init_db
 
 openapi_tags = [
@@ -22,6 +24,14 @@ openapi_tags = [
     {
         "name": "projects",
         "description": "CRUD endpoints for managing projects (owned per authenticated user), optionally linked to clients.",
+    },
+    {
+        "name": "dashboard",
+        "description": "Dashboard analytics endpoints (counts and recent items), scoped to the authenticated user.",
+    },
+    {
+        "name": "settings",
+        "description": "Per-user settings endpoints (currently theme preference), scoped to the authenticated user.",
     },
 ]
 
@@ -61,3 +71,5 @@ def health_check():
 app.include_router(auth_router)
 app.include_router(clients_router)
 app.include_router(projects_router)
+app.include_router(dashboard_router)
+app.include_router(settings_router)
